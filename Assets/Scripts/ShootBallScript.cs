@@ -11,14 +11,18 @@ public class ShootBallScript : MonoBehaviour
     private const KeyCode rotateCCWButton = KeyCode.LeftArrow;
     private const KeyCode rotateCCButton = KeyCode.RightArrow;
     private const KeyCode shootButton = KeyCode.Space;
-    
+
+    private const float INITIAL_VOLUME = 0.01f;
     private const float POWER_ACCELERATION = 10.0f;
     private const float MIN_POWER = 0.0f;
     private const float MAX_POWER = 20.0f;
     private const float MAX_FORCE_ANGLE = 2.0f;
     private const float MIN_FORCE_ANGLE = -2.0f;
     private const float ANGULAR_ACCELERATION = 2.0f;
+    private const float VOLUME_FACTOR = 0.1f;
+    private const float PITCH_FACTOR = 0.1f;
 
+    private float initialAudiencePitch = 0.0f;
     private float forceAngle = 0.0f;
     private float forceMagnitude = 0.0f;
     private float currentPosition = 0.0f;
@@ -49,9 +53,40 @@ public class ShootBallScript : MonoBehaviour
     [SerializeField] GameObject highScoreTextObject;
     [SerializeField] GameObject ballPrefab;
     [SerializeField] GameObject pointPrefab;
+    [SerializeField] GameObject hoopObject;
+    [SerializeField] AudioSource audienceClappingSound;
+    [SerializeField] AudioSource demonSound;
+    [SerializeField] AudioSource owOneSound;
+    [SerializeField] AudioSource owTwoSound;
+    [SerializeField] AudioSource owThreeSound;
+    [SerializeField] AudioSource owFourSound;
 
     private GameObject[] points;
     private const int MAX_POINTS = 20;
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!collision.gameObject.CompareTag("Hoop"))
+        {
+            return;
+        }
+
+        int random = UnityEngine.Random.Range(1, 5);
+
+        if (random == 1)
+        {
+            owOneSound.Play();
+        } else if(random == 2)
+        {
+            owTwoSound.Play();
+        } else if(random == 3)
+        {
+            owThreeSound.Play();
+        } else
+        {
+            owFourSound.Play();
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -63,6 +98,16 @@ public class ShootBallScript : MonoBehaviour
 
         ScreenFX.didScore = true;
         myCurrentScore += 1;
+        audienceClappingSound.volume = INITIAL_VOLUME + (myCurrentScore - 1) * VOLUME_FACTOR;
+        audienceClappingSound.pitch = initialAudiencePitch + (myCurrentScore * PITCH_FACTOR);
+        audienceClappingSound.Play();
+
+        demonSound.pitch = UnityEngine.Random.Range(-1.0f, 1.0f);
+
+        if (myCurrentScore == 5)
+        {
+            demonSound.Play();
+        }
 
         if(myHighScore <= myCurrentScore)
         {
@@ -120,6 +165,8 @@ public class ShootBallScript : MonoBehaviour
         powerSlider.maxValue = MAX_POWER;
         arrowRenderer = arrowObject.GetComponent<SpriteRenderer>();
 
+        initialAudiencePitch = audienceClappingSound.pitch;
+        
         points = new GameObject[MAX_POINTS];
 
         for(int x = 0; x < MAX_POINTS; x++)
@@ -131,6 +178,12 @@ public class ShootBallScript : MonoBehaviour
         highScoreText = highScoreTextObject.GetComponent<Text>();
     }
 
+    private void ResetHoopPosition()
+    {
+        float xLocation = UnityEngine.Random.Range(-4.5f, 4.5f);
+        hoopObject.transform.position = new Vector3(xLocation, 0.0f, 0.0f);
+    }
+
     // Update is called once per frame
     void Update() {
 
@@ -140,7 +193,10 @@ public class ShootBallScript : MonoBehaviour
             myRigidBody.velocity = Vector2.zero;
             myRigidBody.isKinematic = true;
             arrowRenderer.enabled = true;
+            powerSlider.enabled = true;
             ScreenFX.didScore = false;
+            audienceClappingSound.Stop();
+            ResetHoopPosition();
             return;
         }
 
@@ -184,6 +240,7 @@ public class ShootBallScript : MonoBehaviour
             myRigidBody.velocity = velocity;
             myCurrentPower = 0.0f;
             powerSlider.value = MIN_POWER;
+            powerSlider.enabled = false;
             arrowRenderer.enabled = false;
 
             for(int x = 0; x < MAX_POINTS; x++)

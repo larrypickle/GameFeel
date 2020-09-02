@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Missile
   - Ground
+  - Hoop
   layers:
   - Default
   - TransparentFX
