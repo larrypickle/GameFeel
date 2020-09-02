@@ -13,7 +13,7 @@ public class ShootBallScript : MonoBehaviour
     private const KeyCode shootButton = KeyCode.Space;
 
     private const float INITIAL_VOLUME = 0.01f;
-    private const float POWER_ACCELERATION = 11.6f;
+    private const float POWER_ACCELERATION = 11.5f;
     private const float MIN_POWER = 0.0f;
     private const float MAX_POWER = 20.0f;
     private const float MAX_FORCE_ANGLE = 2.0f;
