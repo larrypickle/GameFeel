@@ -13,7 +13,7 @@ public class ShootBallScript : MonoBehaviour
     private const KeyCode shootButton = KeyCode.Space;
 
     private const float INITIAL_VOLUME = 0.01f;
-    private const float POWER_ACCELERATION = 10.0f;
+    private const float POWER_ACCELERATION = 11.6f;
     private const float MIN_POWER = 0.0f;
     private const float MAX_POWER = 20.0f;
     private const float MAX_FORCE_ANGLE = 2.0f;
@@ -54,12 +54,16 @@ public class ShootBallScript : MonoBehaviour
     [SerializeField] GameObject ballPrefab;
     [SerializeField] GameObject pointPrefab;
     [SerializeField] GameObject hoopObject;
+
     [SerializeField] AudioSource audienceClappingSound;
     [SerializeField] AudioSource demonSound;
     [SerializeField] AudioSource owOneSound;
     [SerializeField] AudioSource owTwoSound;
     [SerializeField] AudioSource owThreeSound;
     [SerializeField] AudioSource owFourSound;
+    [SerializeField] AudioSource risingSynthSound;
+    [SerializeField] AudioSource fallingSynthSound;
+    [SerializeField] AudioSource shootSound;
 
     private GameObject[] points;
     private const int MAX_POINTS = 20;
@@ -214,8 +218,10 @@ public class ShootBallScript : MonoBehaviour
 
             if (myCurrentPower == MAX_POWER) {
                 isPowerAscending = false;
+                fallingSynthSound.Play();
             } else if (myCurrentPower == MIN_POWER) {
                 isPowerAscending = true;
+                risingSynthSound.Play();
             }
 
             if (isPowerAscending) {
@@ -234,6 +240,8 @@ public class ShootBallScript : MonoBehaviour
 
         if(Input.GetKeyUp(shootButton))
         {
+            risingSynthSound.Stop(); fallingSynthSound.Stop();
+            shootSound.Play();
             myRigidBody.isKinematic = false;
             Vector2 velocity = DegreeToVector2(arrowPivotObject.transform.rotation.eulerAngles.z);
             velocity *= myCurrentPower;
